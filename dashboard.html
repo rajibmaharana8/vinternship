@@ -817,54 +817,47 @@ function renderCSProgress() {
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
-    const columns = ["Rank", "Name", "Email", "Current_HP", "Base_HP", "HP_Status", "Details"];
+    const columns = ["Rank", "Name", "Email", "Current HP", "Base HP", "HP Status", "Details"];
 
-    const trh = document.createElement("tr");
-    columns.forEach(c => {
-      const th = document.createElement("th");
-      th.textContent = c.replace("_", " ");
-      trh.appendChild(th);
-    });
-    thead.appendChild(trh);
 
     filtered.forEach((r, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="num">${i + 1}</td>
-        <td>${r.Name}</td>
-        <td>${r.Email}</td>
-        <td class="num">${Number(r.Current_HP).toFixed(2)}</td>
-        <td class="num">${Number(r.Base_HP).toFixed(2)}</td>
-        <td>
-          <span style="
-            padding:4px 10px;
-            border-radius:999px;
-            font-weight:700;
-            font-size:12px;
-            color:${r.HP_Status === "SAFE" ? "#1B5E20" : "#B71C1C"};
-            background:${r.HP_Status === "SAFE" ? "#C8E6C9" : "#FFCDD2"};
-          ">
-            ${r.HP_Status}
-          </span>
-        </td>
-        <td>
-          <button onclick="viewHpDetail('${r.Email}')"
-            style="
-              padding:6px 10px;
-              border:none;
-              border-radius:6px;
-              background:#1a237e;
-              color:white;
-              cursor:pointer;
-              font-weight:600;
-            ">
-            View
-          </button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td class="num">${r.rank}</td>
+    <td>${r.name}</td>
+    <td>${r.email}</td>
+    <td class="num">${Number(r.currentHP).toFixed(2)}</td>
+    <td class="num">${Number(r.baseHP).toFixed(2)}</td>
+    <td>
+      <span style="
+        padding:4px 10px;
+        border-radius:999px;
+        font-weight:700;
+        font-size:12px;
+        color:${r.status === "SAFE" ? "#1B5E20" : "#B71C1C"};
+        background:${r.status === "SAFE" ? "#C8E6C9" : "#FFCDD2"};
+      ">
+        ${r.status}
+      </span>
+    </td>
+    <td>
+      <button onclick="viewHpDetail('${r.email}')"
+        style="
+          padding:6px 10px;
+          border:none;
+          border-radius:6px;
+          background:#1a237e;
+          color:white;
+          cursor:pointer;
+          font-weight:600;
+        ">
+        View
+      </button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
+
 
   document.getElementById("hp-search")?.addEventListener("input", renderHealthPoints);
   // ========= UI WIRING =========
