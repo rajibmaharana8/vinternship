@@ -252,6 +252,44 @@
     font-weight: 700;
     color: #6b7280;
   }
+
+  .top-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px 0 20px;
+}
+
+/* Back button */
+.back-btn {
+  background: #e8eaf6;
+  color: #1a237e;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background: #dfe2fd;
+}
+
+/* Tabs stay centered */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex: 1;               /* THIS IS THE KEY */
+  flex-wrap: wrap;
+}
+
+/* Right spacer (keeps tabs centered) */
+.top-bar-spacer {
+  width: 80px;           /* same visual weight as back button */
+}
+
 </style>
 </head>
 
@@ -263,18 +301,19 @@
 </div>
 
 <!-- Top Tabs -->
-<div class="tabs">
-  <div class="tab active" data-tab="leaderboard">Leaderboard</div>
-  <div class="tab" data-tab="cs">CS Progress</div>
-  <div class="tab" data-tab="health">Health Points</div>
-  <div class="tab" data-tab="tickets">Tickets</div>
+<div class="top-bar">
+  <button class="back-btn" onclick="history.back()">← Back</button>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="leaderboard">Leaderboard</div>
+    <div class="tab" data-tab="cs">CS Progress</div>
+    <div class="tab" data-tab="health">Health Points</div>
+    <div class="tab" data-tab="tickets">Tickets</div>
+  </div>
+
+  <div class="top-bar-spacer"></div>
 </div>
-  <!-- Back Button -->
-  <a href="https://sudarshansudarshan.github.io/pinternship/"
-     class="back-btn">
-     ← Back
-  </a>
-</div>
+
 
 
 <!-- Leaderboard Tab -->
@@ -309,29 +348,70 @@
   </div>
 </div>
 
-<!-- CS Progress Tab (placeholder) -->
+<!-- CS Progress Tab -->
 <div class="tab-content" id="tab-cs">
   <div class="dashboard-inner">
     <div class="dashboard-view" style="width:100%;">
-      <div class="placeholder">
-        <h2 style="color:#1a237e;">CS Progress</h2>
-        <p class="soon">Will be added soon</p>
+
+      <div class="status-row">
+        <div class="pill">CS PROGRESS</div>
+
+        <div class="search">
+          <input id="cs-search" placeholder="Search by name or email…" />
+        </div>
       </div>
+
+      <div style="margin-bottom:14px;">
+        <a href="https://forms.gle/9brRWW5kAbv2kaH98" target="_blank"
+           style="
+             display:inline-block;
+             padding:10px 16px;
+             background:#1a237e;
+             color:white;
+             border-radius:8px;
+             font-weight:600;
+             text-decoration:none;
+           ">
+          Submit your Case Studies here
+        </a>
+      </div>
+
+      <div class="table-wrap">
+        <table id="cs-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
 
-<!-- Health Points Tab (placeholder) -->
+
+<!-- Health Points Tab -->
 <div class="tab-content" id="tab-health">
   <div class="dashboard-inner">
     <div class="dashboard-view" style="width:100%;">
-      <div class="placeholder">
-        <h2 style="color:#1a237e;">Health Points</h2>
-        <p class="soon">Will be added soon</p>
+
+      <div class="status-row">
+        <div class="pill">Health Points Leaderboard</div>
+        <div class="search">
+          <input id="hp-search" placeholder="Search name or email…" />
+          <span class="muted" id="hp-meta"></span>
+        </div>
       </div>
+
+      <div class="table-wrap">
+        <table id="hp-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
+
 
 <!-- Tickets Tab (placeholder with bars) -->
 <div class="tab-content" id="tab-tickets">
@@ -352,8 +432,8 @@
 
 <script>
   // ========= CONFIG =========
-  const API_URL = "https://script.google.com/macros/s/AKfycbyL7rAIQpQ_Ci1wtCQnxcz-RuVjbAbMcN_lWmaofp3zixkfVQQ7k2FfDVtieBmNVOKHMQ/exec";
-
+  const API_URL = "https://script.google.com/macros/s/AKfycbyU2YIGp55fzmJvhLP_DdNUTUCd6DbMHQUeayuFCL6xioWm7R0YB2L0KRftupQzGYR9Xw/exec";
+  const HP_API_URL = "https://script.google.com/macros/s/AKfycbwq_M-IDZlZUlDMJ7gXuhLhNq304qdCLs60plmJ90TtVtLtnZURKPxnrRVeS3kwLzZ2Hg/exec";
   // We expect the API JSON to include these keys:
   // {
   //   state: [...],
@@ -592,6 +672,85 @@
 
     renderTable(table, rows, { columns, bandMetricKey: bandMetric });
   }
+function renderCSProgress() {
+  const table = document.getElementById("cs-table");
+  if (!table || !apiData || !apiData.csProgress) return;
+
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+  const searchInput = document.getElementById("cs-search");
+
+  /**
+   * IMPORTANT:
+   * Row 1 → mapping (ignore)
+   * Row 2 → header
+   * Data starts from Row 3
+   *
+   * sheetToJSON already converted rows,
+   * so we SKIP the FIRST OBJECT only.
+   */
+  const rawRows = apiData.csProgress.slice(1); // 🔴 skip mapping row
+
+  if (!rawRows.length) return;
+
+  const columns = Object.keys(rawRows[0]);
+
+  // ---------- RENDER HEADER ----------
+  thead.innerHTML = "";
+  const trh = document.createElement("tr");
+  columns.forEach(col => {
+    const th = document.createElement("th");
+    th.textContent = col;
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh);
+
+  // ---------- RENDER BODY ----------
+  function draw(rows) {
+    tbody.innerHTML = "";
+
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+
+      columns.forEach(col => {
+        const td = document.createElement("td");
+        const val = r[col];
+
+        if (val === "Yes") {
+          td.textContent = "✓";
+          td.style.color = "#1B5E20";
+          td.style.fontWeight = "700";
+          td.style.textAlign = "center";
+        } else if (val === "" || val === null || val === undefined) {
+          td.textContent = "–";
+          td.style.color = "#9E9E9E";
+          td.style.textAlign = "center";
+        } else {
+          td.textContent = val;
+        }
+
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Initial render
+  draw(rawRows);
+
+  // ---------- SEARCH ----------
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.toLowerCase();
+      const filtered = rawRows.filter(r =>
+        (r.Name || "").toLowerCase().includes(q) ||
+        (r.Email || "").toLowerCase().includes(q)
+      );
+      draw(filtered);
+    });
+  }
+}
 
   // ========= API =========
   async function loadAPI() {
@@ -617,15 +776,169 @@
       console.error(err);
     }
   }
+ // ========= HEALTH POINTS =========
+  let hpData = null;
+
+  async function loadHealthPoints() {
+    const meta = document.getElementById("hp-meta");
+    meta.textContent = "Loading…";
+
+    try {
+      const res = await fetch(HP_API_URL, { cache: "no-store" });
+      hpData = await res.json();
+      renderHealthPoints();
+    } catch (e) {
+      meta.textContent = "Failed to load";
+      console.error(e);
+    }
+  }
+
+ function renderHealthPoints() {
+  if (!hpData || !hpData.leaderboard) return;
+
+  const rows = hpData.leaderboard;
+  const search = document.getElementById("hp-search");
+  const meta = document.getElementById("hp-meta");
+  const table = document.getElementById("hp-table");
+
+  let filtered = rows;
+  if (search.value) {
+    const q = search.value.toLowerCase();
+    filtered = rows.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.email.toLowerCase().includes(q)
+    );
+  }
+
+  meta.textContent = `Students: ${filtered.length}`;
+
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  const columns = ["Rank", "Name", "Email", "Current HP", "Base HP", "HP Status", "Details"];
+
+  // ✅ HEADER
+  const trh = document.createElement("tr");
+  columns.forEach(c => {
+    const th = document.createElement("th");
+    th.textContent = c;
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh);
+
+  // ✅ BODY
+  filtered.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="num">${r.rank}</td>
+      <td>${r.name}</td>
+      <td>${r.email}</td>
+      <td class="num">${Number(r.currentHP).toFixed(2)}</td>
+      <td class="num">${Number(r.baseHP).toFixed(2)}</td>
+      <td>
+        <span style="
+          padding:4px 10px;
+          border-radius:999px;
+          font-weight:700;
+          font-size:12px;
+          color:${r.status === "SAFE" ? "#1B5E20" : "#B71C1C"};
+          background:${r.status === "SAFE" ? "#C8E6C9" : "#FFCDD2"};
+        ">
+          ${r.status}
+        </span>
+      </td>
+      <td>
+        <button onclick="viewHpDetail('${r.email}')"
+          style="
+            padding:6px 10px;
+            border:none;
+            border-radius:6px;
+            background:#1a237e;
+            color:white;
+            cursor:pointer;
+            font-weight:600;
+          ">
+          View
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+} // ✅ FUNCTION CLOSED
 
   // ========= UI WIRING =========
   function activateTopTab(key) {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
 
-    document.querySelector(`.tab[data-tab="${key}"]`).classList.add("active");
-    document.getElementById(`tab-${key}`).classList.add("active");
+  document.querySelector(`.tab[data-tab="${key}"]`).classList.add("active");
+  document.getElementById(`tab-${key}`).classList.add("active");
+
+  if (key === "cs") renderCSProgress();
+  if (key === "health" && !hpData) loadHealthPoints(); // 👈 ONLY LOAD ON DEMAND
+}
+
+//view details
+
+  async function viewHpDetail(email) {
+  // ✅ OPEN WINDOW IMMEDIATELY (user action)
+  const w = window.open("", "_blank", "width=720,height=600");
+  if (!w) {
+    alert("Popup blocked. Please allow popups for this site.");
+    return;
   }
+
+  w.document.write(`
+    <html>
+      <body style="font-family:Segoe UI;padding:20px;">
+        <p>Loading details for ${email}…</p>
+      </body>
+    </html>
+  `);
+
+  try {
+    const url = `${HP_API_URL}?detail=1&email=${encodeURIComponent(email)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    let html = `
+      <h3>Health Points Breakdown</h3>
+      <p class="small">${email}</p>
+      <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+        <tr>
+          <th>Date</th>
+          <th>Source</th>
+          <th>%</th>
+          <th>Before</th>
+          <th>After</th>
+        </tr>
+    `;
+
+    (data.breakdown || []).forEach(r => {
+      html += `
+        <tr>
+          <td>${r.appliedDate ?? "-"}</td>
+          <td>${r.sourceRef ?? "-"}</td>
+          <td class="num">${r.appliedPercent ?? "-"}%</td>
+          <td class="num">${Number(r.currentHPBefore ?? 0).toFixed(2)}</td>
+          <td class="num">${Number(r.currentHPAfter ?? 0).toFixed(2)}</td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+
+    w.document.body.innerHTML = html;
+  } catch (err) {
+    w.document.body.innerHTML = `
+      <h3>Error loading details</h3>
+      <pre>${err.message}</pre>
+    `;
+    console.error(err);
+  }
+}
 
   function activateInner(key) {
     // left menu active state
@@ -656,4 +969,4 @@
 </script>
 
 </body>
-</html>
+</html> 
