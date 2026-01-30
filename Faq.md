@@ -206,6 +206,33 @@ In the meantime, you may try the following steps once:
 
 If the issue still persists after these steps, no further action is required from your side. Your course completion status will be corrected by the support team shortly.
 
+**7.7 I feel the ViBe content or platform is not good or I am unhappy with the way progress is evaluated. Can I request an exception or bypass the system?**  
+
+ViBe is built and continuously improved by interns and students themselves. It is a free and open-source learning platform, and our goal is to keep it that way by encouraging the community to actively contribute, improve, and strengthen it rather than bypass it.
+
+If a learner strongly feels that the regular ViBe flow does not fairly reflect their understanding, there is a formal alternative evaluation path. However, this path is intentionally rigorous to ensure fairness for everyone.
+
+In such cases, you will be asked to:
+
+- Watch the specified YouTube video content completely (links will be provided).
+- Appear for a three-hour proctored examination based only on that content.
+- Write the exam under strict supervision with:
+  - Two cameras (front and side view), and  
+  - One online human proctor monitoring you live.
+
+This examination becomes the sole basis for evaluation in place of the regular internship track.
+
+The scoring rules are strict:
+
+- **Score below 60%**: You are considered not qualified and must join the next cohort and continue only through the normal ViBe mode.
+- **Score between 60% and 80%**: You get one more chance in the next scheduled exam.
+- **Score above 80%**: You are considered to have passed.
+
+This special exam is conducted once every fortnight, so choosing this route may significantly delay your progress compared to continuing normally on ViBe.
+
+Because this path is far more demanding and time-consuming than simply completing the regular videos, quizzes, and activities, most students find that continuing with the standard ViBe workflow is the faster and better option.
+
+
 ---
 
 
@@ -275,6 +302,7 @@ You can track your submission status, access the leaderboard, and view the dashb
 **8.9. What next if I completed my Case Studies and I am done with my endorsements?**
 We have some project ideas from the existing open source projects from Vicharanashala Lab for Education Design and Annam.AI listed on the Vinternship website. You can contribute to these real-time open-source projects, working with our developers to build real applications and add new features.
 
+---
 
 ## 9. Ejection Policy
 
